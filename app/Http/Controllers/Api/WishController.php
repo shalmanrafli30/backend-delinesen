@@ -58,8 +58,13 @@ class WishController extends Controller
 
         // auto-generate ID jika kosong
         if (empty($data['wishes_id'])) {
-            $count = StsWish::where('sts_id', $data['sts_id'])->count() + 1;
-            $seq = str_pad($count, 3, '0', STR_PAD_LEFT);
+            $last = StsWish::where('sts_id', $data['sts_id'])
+                ->selectRaw("MAX(CAST(SUBSTRING_INDEX(wishes_id, '-', -1) AS UNSIGNED)) as max_seq")
+                ->value('max_seq');
+
+            $next = $last ? $last + 1 : 1;
+            $seq  = str_pad($next, 3, '0', STR_PAD_LEFT);
+
             $data['wishes_id'] = 'WISH-' . $data['sts_id'] . '-' . $seq;
         }
 
